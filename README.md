@@ -1,4 +1,3 @@
-
 # Distance-Weighted Ordinal Regression for Kellgren-Lawrence Grading
 
 This repository contains code to reproduce the experiments in:
@@ -25,56 +24,57 @@ We recommend using `uv`:
 ```bash
 uv venv
 uv pip install -r requirements.txt
+```
 
 Minimal install:
-
+```bash
 uv pip install torch torchvision scikit-learn pillow timm matplotlib
+```
 
 ## Project Structure
-
+```
 dataset/
-  set_a/{train,val,test}/{0-4}/
-  set_b/{train,val,test}/{0-4}/
+set_a/{train,val,test}/{0-4}/
+set_b/{train,val,test}/{0-4}/
 scripts/
 src/
 experiments/
+```
 
 ## Reproduce Main Experiments
 
 ### Baseline (classical ML)
-
+```bash
 uv run python scripts/run_baseline_experiment.py --data dataset/set_a --out experiments/results/baseline
+```
 
 ### Deep Learning (example)
-
+```bash
 uv run knee-oa-train train --config experiments/configs/advanced_cnn/convnext_tiny.yaml --device cuda
+```
 
 ### Evaluate a checkpoint
-
+```bash
 uv run knee-oa-train evaluate --config <config.yaml> --checkpoint <path>
+```
 
 ### Recompute metrics from existing predictions (no training)
-
+```bash
 uv run python scripts/recompute_set_b_metrics_from_npz.py
+```
 
 ## Results
-
 Key metrics and summaries are saved under:
-
+```
 experiments/reports/
 experiments/results/
+```
 
 ## License
-
-MIT License (see LICENSE).
+MIT License (see `LICENSE`).
 
 ## Citation
-
 If you use this code, please cite:
-
+```
 [Add citation after acceptance]
-
-## Contact
-
-Corresponding author: Yunhai Li
-Email: 10199253@sina.com
+```
