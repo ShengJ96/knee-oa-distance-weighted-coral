@@ -1,0 +1,69 @@
+# Stage 6 tuned v3 — SigLIP on Set B with importance_weights
+# 主要改进：使用官方CORAL的importance_weights处理类别不平衡
+experiment:
+  name: stage6_siglip_ord_coral_set_b_tuned_v3
+  seed: 2025
+  output_dir: experiments/models/stage6/siglip_ord_coral/set_b_tuned_v3
+  figures_dir: experiments/figures/stage6_siglip_ord_coral_set_b_tuned_v3
+  reports_dir: experiments/reports/stage6_siglip_ord_coral_set_b_tuned_v3
+model:
+  type: foundation
+  backbone: siglip_base_patch16_384
+  head:
+    type: ordinal
+    hidden_dims: [256]
+    dropout: 0.3
+    classifier_dropout: 0.3
+data:
+  dataset_path: dataset/set_b
+  image_size: 448  # 比384更高分辨率
+  batch_size: 16
+  num_workers: 4
+  augmentation:
+    train:
+      - RandomHorizontalFlip:
+          p: 0.5
+      - RandomVerticalFlip:
+          p: 0.5
+      - ColorJitter:
+          brightness: 0.15
+          contrast: 0.15
+          saturation: 0.15
+          hue: 0.05
+      - RandomRotation:
+          degrees: 15
+      - RandomResizedCrop:
+          size: [448, 448]
+          scale: [0.8, 1.0]
+    val:
+      - Resize:
+          size: [448, 448]
+training:
+  epochs: 40
+  optimizer:
+    name: adamw
+    learning_rate: 0.0002
+    lr_backbone: 0.00003  # 骨干更低学习率
+    lr_head: 0.0005      # 头部更高学习率
+    weight_decay: 0.02
+  scheduler:
+    name: cosine
+    warmup_epochs: 5
+    min_lr: 0.000001
+  criterion:
+    name: coral
+    # ⚠️ 关键改进：使用 importance_weights 处理类别不平衡
+    # Set B 训练集统计：
+    #   Grade 0: 360, Grade 1: 675, Grade 2: 162, Grade 3: 155, Grade 4: 144
+    # CORAL 4个阈值的不平衡比例（负/正）：
+    #   >= 1: 360/1136 = 0.317
+    #   >= 2: 1035/461 = 2.245
+    #   >= 3: 1197/299 = 4.003
+    #   >= 4: 1352/144 = 9.389 ⚠️ 极度不平衡！
+    importance_weights: [0.317, 2.245, 4.003, 9.389]
+  label_smoothing: 0.1  # 改善校准
+  mixup_alpha: 0.3
+  cutmix_alpha: 1.2
+  gradient_clip: 1.0
+  save_best: true
+  save_last: true

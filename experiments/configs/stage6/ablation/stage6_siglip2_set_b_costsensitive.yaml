@@ -1,0 +1,66 @@
+# Stage 6 Ablation: SIGLIP2 on SET_B with COSTSENSITIVE
+# Method: Cost-Sensitive CORAL (quadratic)
+experiment:
+  name: stage6_siglip2_set_b_costsensitive
+  seed: 2025
+  output_dir: experiments/models/stage6/siglip2_ord_coral/set_b_costsensitive
+  figures_dir: experiments/figures/stage6_siglip2_set_b_costsensitive
+  reports_dir: experiments/reports/stage6_siglip2_set_b_costsensitive
+model:
+  registry: foundation_general
+  key: siglip2_so400m_patch14_384
+  params:
+    pretrained_name: google/siglip2-so400m-patch14-384
+    num_classes: 5
+    freeze_backbone_epochs: 1
+    classifier_dropout: 0.3
+    pool_type: cls
+    head:
+      type: ordinal
+      mode: coral
+      hidden_dims:
+      - 384
+      dropout: 0.3
+      classifier_dropout: 0.3
+data:
+  target_size:
+  - 384
+  - 384
+  batch_size: 12
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+  root: dataset/set_b
+training:
+  epochs: 30
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 4
+optimization:
+  optimizer: adamw
+  learning_rate: 3.0e-05
+  head_learning_rate: 0.0003
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+  criterion:
+    name: cost_sensitive_coral
+    cost_matrix: quadratic
+scheduler:
+  name: cosine
+  params:
+    min_lr: 3.0e-06
+    warmup_epochs: 5
+evaluation:
+  metrics:
+  - accuracy
+  - f1_macro
+  - cohen_kappa
+  attention_viz:
+    enable: false

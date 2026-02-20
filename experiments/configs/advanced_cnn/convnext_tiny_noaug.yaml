@@ -1,0 +1,59 @@
+# ConvNeXt-Tiny configuration without heavy augmentations
+experiment:
+  name: stage4_convnext_tiny_noaug
+  seed: 123
+  output_dir: experiments/models/advanced_dl/stage4_convnext_tiny_noaug
+  figures_dir: experiments/figures/stage4_convnext_tiny_noaug
+  reports_dir: experiments/reports/stage4_convnext_tiny_noaug
+
+model:
+  registry: advanced_cnn
+  key: convnext_tiny
+  params:
+    num_classes: 5
+    pretrained: true
+    classifier_dropout: 0.3
+    freeze_backbone: false
+
+data:
+  root: dataset/set_a
+  target_size: [288, 288]
+  batch_size: 24
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: torchvision
+    variant: light
+    augment_train: false
+    eval_library: torchvision
+
+training:
+  epochs: 60
+  save_best: true
+  save_last: true
+  early_stopping_patience: 15
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00015
+  head_learning_rate: 0.0004
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: one_cycle
+  params:
+    max_lr: 0.0003
+    pct_start: 0.1
+    anneal_strategy: cosine
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: true
+    rollout: true
+    samples_per_class: 3
+    output_dir: experiments/figures/stage4_convnext_tiny_noaug/attention

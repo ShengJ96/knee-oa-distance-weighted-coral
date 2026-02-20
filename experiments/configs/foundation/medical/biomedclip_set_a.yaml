@@ -1,0 +1,60 @@
+# Stage 5 medical foundation template — BiomedCLIP ViT-B/16 on Set A
+# NOTE: Requires implementation of `foundation_medical` registry (vision encoder + CLIP text adapter optional).
+experiment:
+  name: stage5_biomedclip_set_a
+  seed: 2025
+  output_dir: experiments/models/foundation/medical/biomedclip/set_a
+  figures_dir: experiments/figures/stage5_biomedclip_set_a
+  reports_dir: experiments/reports/stage5_biomedclip
+
+model:
+  registry: foundation_medical
+  key: biomedclip_vit_b16
+  params:
+    pretrained_name: microsoft/BiomedCLIP-PubMedBERT-ViT-B-16
+    num_classes: 5
+    freeze_backbone_epochs: 2
+    classifier_dropout: 0.4
+    projection_dim: 768
+    pool_type: mean
+
+data:
+  root: dataset/set_a
+  target_size: [224, 224]
+  batch_size: 32
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: medical_light
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 40
+  save_best: true
+  save_last: true
+  early_stopping_patience: 10
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.0001
+  head_learning_rate: 0.0003
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 1.0e-5
+    warmup_epochs: 5
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: true
+    rollout: true
+    samples_per_class: 3

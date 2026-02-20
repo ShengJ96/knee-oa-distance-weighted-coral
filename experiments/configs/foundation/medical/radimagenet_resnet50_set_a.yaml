@@ -1,0 +1,59 @@
+# Stage 5 medical foundation template — RadImageNet ResNet50 on Set A
+# NOTE: Requires implementation of `foundation_medical` registry with RadImageNet ResNet backbones.
+experiment:
+  name: stage5_radimagenet_resnet50_set_a
+  seed: 2025
+  output_dir: experiments/models/foundation/medical/radimagenet_resnet50/set_a
+  figures_dir: experiments/figures/stage5_radimagenet_resnet50_set_a
+  reports_dir: experiments/reports/stage5_radimagenet_resnet50
+
+model:
+  registry: foundation_medical
+  key: radimagenet_resnet50
+  params:
+    pretrained_name: Lab-Rasool/RadImageNet
+    num_classes: 5
+    freeze_backbone_epochs: 0
+    classifier_dropout: 0.25
+
+# RadImageNet models expect 224x224 with modality-aware normalization
+data:
+  root: dataset/set_a
+  target_size: [224, 224]
+  batch_size: 48
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: radimagenet
+  augmentation:
+    library: albumentations
+    variant: medical_light
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 40
+  save_best: true
+  save_last: true
+  early_stopping_patience: 10
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: sgd
+  learning_rate: 0.01
+  momentum: 0.9
+  weight_decay: 0.0005
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: step
+  params:
+    step_size: 10
+    gamma: 0.2
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: true
+    rollout: false
+    samples_per_class: 3

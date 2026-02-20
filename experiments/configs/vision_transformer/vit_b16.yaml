@@ -1,0 +1,58 @@
+# Stage 4 experiment template for ViT-B/16 fine-tuning
+experiment:
+  name: stage4_vit_b16
+  seed: 77
+  output_dir: experiments/models/advanced_dl/stage4_vit_b16
+  figures_dir: experiments/figures/stage4_vit_b16
+  reports_dir: experiments/reports/stage4_vit_b16
+
+model:
+  registry: vision_transformer
+  key: vit_b16
+  params:
+    num_classes: 5
+    pretrained: true
+    ignore_mismatched_sizes: true
+    output_hidden_states: true
+
+# Data pipeline leverages albumentations strong augmentations for ViT
+# with higher input resolution to match the transformer expectations
+data:
+  root: dataset/set_a
+  target_size: [224, 224]
+  batch_size: 24
+  num_workers: 8
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: albumentations
+
+training:
+  epochs: 40
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.0001
+  head_learning_rate: 0.0003
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine_warm_restarts
+  params:
+    T_0: 6
+    T_mult: 2
+    eta_min: 1.0e-06
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: true
+    samples_per_class: 3
+    output_dir: experiments/figures/stage4_vit_b16/attention

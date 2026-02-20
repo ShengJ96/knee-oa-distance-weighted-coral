@@ -1,0 +1,57 @@
+# Stage 5 foundation baseline template — MambaVision-T2 (ImageNet-1K) on Set B
+# NOTE: Requires implementation of `foundation_general` registry in training CLI with MambaVision support.
+experiment:
+  name: stage5_mambavision_set_b
+  seed: 2025
+  output_dir: experiments/models/foundation/general/mambavision/set_b
+  figures_dir: experiments/figures/stage5_mambavision_set_b
+  reports_dir: experiments/reports/stage5_mambavision
+
+model:
+  registry: foundation_general
+  key: mambavision_t2_1k
+  params:
+    pretrained_name: nvidia/MambaVision-T2-1K
+    num_classes: 5
+    freeze_backbone_epochs: 0
+    classifier_dropout: 0.1
+    pool_type: mean
+
+data:
+  root: dataset/set_b
+  target_size: [448, 448]
+  batch_size: 16
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 40
+  save_best: true
+  save_last: true
+  early_stopping_patience: 10
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00003
+  head_learning_rate: 0.00015
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 3.0e-6
+    warmup_epochs: 5
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false

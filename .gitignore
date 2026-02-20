@@ -1,0 +1,254 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# UV
+.uv/
+
+# Machine Learning and Data Science
+# Datasets (keeping structure but not actual images)
+dataset/**/*.png
+dataset/**/*.jpg
+dataset/**/*.jpeg
+dataset/**/*.dcm
+dataset/**/*.nii
+dataset/**/*.nii.gz
+dataset/**/*.h5
+dataset/set_a/train/
+dataset/set_a/val/
+dataset/set_a/test/
+dataset/set_a/h5/
+dataset/set_b/train/
+dataset/set_b/val/
+dataset/set_b/test/
+dataset/set_b/h5/
+dataset/set_c/
+
+# Model files
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Experiment results
+experiments/results/**/*
+!experiments/results/.gitkeep
+!experiments/results/*.json
+# Reports generated from analyses (keep out of git by default)
+experiments/reports/*.json
+experiments/reports/*.csv
+# (Do not ignore experiments/logs; allow committing .log files for debugging)
+!experiments/logs/**
+# Keep ablation run logs for debugging
+!experiments/ablations/**/logs/*.log
+experiments/models/**/*
+!experiments/models/.gitkeep
+!experiments/models/**/
+!experiments/models/**/metadata.json
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Weights & Biases
+wandb/
+
+# TensorBoard
+runs/
+/logs/
+!experiments/logs/
+!experiments/logs/**/*.log
+
+# Generated reports and figures
+reports/figures/**/*
+!reports/figures/.gitkeep
+reports/**/*.html
+reports/**/*.pdf
+
+# Local reference documents (author guidelines, etc.)
+Guide for authors - Computer Methods and Programs in Biomedicine - ISSN 0169-2607 _ ScienceDirect.com by Elsevier.html
+Guide for authors - Computer Methods and Programs in Biomedicine - ISSN 0169-2607 _ ScienceDirect.com by Elsevier_files/
+
+# Dataset backups (local only)
+dataset/set_b_backup_*/
+
+# Figure backups
+latex/figures/*_backup_*.pdf
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# GPU memory dumps
+*.dump
+
+# Large files (use Git LFS if needed)
+*.zip
+*.tar.gz
+*.7z
+
+# Configuration files with sensitive information
+config/secrets.yaml
+.env.local
+.env.production
+
+# Cache directories
+.cache/
+cache/
+
+# Backup files
+*.bak
+*.backup
+
+# Profiling results
+*.prof
+
+# OS specific
+*.pid
+*.seed
+*.pid.lock
+*.png
+# Custom project specific
+# Add any project-specific files/folders to ignore
+
+# Track lightweight experiment summaries
+!experiments/results/*.json
+!experiments/models/**/
+!experiments/models/**/metadata.json
+
+# Ignore most figures but allow stage6_attention for paper
+experiments/figures/*
+!experiments/figures/stage6_attention/
+
+# Allow prediction files (.npz) and clinical metrics for paper
+!experiments/reports/predictions/*.npz
+!experiments/reports/clinical_metrics/*.json
+!experiments/reports/clinical_metrics/*.md

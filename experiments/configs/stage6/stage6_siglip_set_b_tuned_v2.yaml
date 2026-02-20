@@ -1,0 +1,67 @@
+# Stage 6 tuned v2 — SigLIP on Set B (针对类别不平衡 + 高ECE优化)
+# 主要改进：label smoothing + 更高dropout + 更小batch + 更强增强
+experiment:
+  name: stage6_siglip_ord_coral_set_b_tuned_v2
+  seed: 2025
+  output_dir: experiments/models/stage6/siglip_ord_coral/set_b_tuned_v2
+  figures_dir: experiments/figures/stage6_siglip_ord_coral_set_b_tuned_v2
+  reports_dir: experiments/reports/stage6_siglip_ord_coral_set_b_tuned_v2
+
+model:
+  registry: foundation_general
+  key: siglip_base_patch16_384
+  params:
+    pretrained_name: google/siglip-base-patch16-384
+    num_classes: 5
+    freeze_backbone_epochs: 1
+    classifier_dropout: 0.3  # 提高 0.2 -> 0.3
+    pool_type: cls
+    head:
+      type: ordinal
+      mode: coral
+      dropout: 0.3  # 提高 0.2 -> 0.3
+
+data:
+  root: dataset/set_b
+  target_size: [448, 448]
+  batch_size: 16  # 减小 20 -> 16（更多梯度更新）
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+    mixup_alpha: 0.3  # 提高 0.2 -> 0.3
+    cutmix_alpha: 1.2  # 提高 1.0 -> 1.2
+
+training:
+  epochs: 40  # 延长 36 -> 40（更小batch需要更多epochs）
+  save_best: true
+  save_last: true
+  early_stopping_patience: 10  # 提高 8 -> 10
+  amp: true
+  grad_accum_steps: 2
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00005  # 稍微降低（更小batch）
+  head_learning_rate: 0.00025
+  weight_decay: 0.02  # 提高 0.015 -> 0.02
+  grad_clip_norm: 1.0
+  criterion: coral
+  label_smoothing: 0.1  # 新增！对改善校准很重要
+  # 类别权重（根据样本分布：360, 675, 162, 155, 144）
+  # class_weights: [1.88, 1.0, 4.17, 4.35, 4.69]  # 如果框架支持
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 3.0e-6  # 稍微降低
+    warmup_epochs: 4
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false

@@ -1,0 +1,61 @@
+# ConvNeXt-Tiny configuration tuned for CPU debugging runs
+experiment:
+  name: stage4_convnext_tiny_cpu
+  seed: 123
+  output_dir: experiments/models/advanced_dl/stage4_convnext_tiny_cpu
+  figures_dir: experiments/figures/stage4_convnext_tiny_cpu
+  reports_dir: experiments/reports/stage4_convnext_tiny_cpu
+
+model:
+  registry: advanced_cnn
+  key: convnext_tiny
+  params:
+    num_classes: 5
+    pretrained: false          # skip weight download during CPU smoke tests
+    classifier_dropout: 0.3
+    freeze_backbone: false
+
+data:
+  root: dataset/set_a
+  target_size: [224, 224]
+  batch_size: 8                # smaller to keep CPU memory use low
+  num_workers: 0               # avoid multiprocessing issues on CPU notebooks
+  limit_per_class: 4           # ~20 samples total for very fast smoke tests
+  limit_per_class_val: 4
+  limit_per_class_test: 4
+  medical_variant: clahe
+  augmentation:
+    library: torchvision       # simpler pipeline, no Albumentations dependency
+    variant: light
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 2                   # single epoch smoke test on CPU
+  save_best: true
+  save_last: true
+  early_stopping_patience: 2
+  amp: false                   # AMP disabled on CPU
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: one_cycle
+  params:
+    max_lr: 0.0006
+    pct_start: 0.2
+    anneal_strategy: cos
+
+knowledge_distillation:
+  enable: false
+  teacher_checkpoint: null
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false              # skip heavy viz during CPU smoke tests

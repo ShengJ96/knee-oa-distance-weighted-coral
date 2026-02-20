@@ -1,0 +1,66 @@
+# Stage 5 medical foundation baseline — BioViL-T multi-source training (Set A + Set B)
+experiment:
+  name: stage5_biovil_t_set_ab
+  seed: 2025
+  output_dir: experiments/models/foundation/medical/biovil_t/set_ab
+  figures_dir: experiments/figures/stage5_biovil_t_set_ab
+  reports_dir: experiments/reports/stage5_biovil_t
+
+model:
+  registry: foundation_medical
+  key: biovil_t
+  params:
+    pretrained_name: microsoft/BiomedVLP-BioViL-T
+    num_classes: 5
+    freeze_backbone_epochs: 2
+    classifier_dropout: 0.4
+    pool_type: cls
+
+data:
+  batch_size: 28
+  num_workers: 8
+  target_size: [448, 448]
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: medical_temporal
+    augment_train: true
+    eval_library: torchvision
+  multi_source:
+    enabled: true
+    sampling: balanced
+    datasets:
+      - name: set_a
+        root: dataset/set_a
+        weight: 1.0
+      - name: set_b
+        root: dataset/set_b
+        weight: 1.0
+
+training:
+  epochs: 45
+  save_best: true
+  save_last: true
+  early_stopping_patience: 12
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00008
+  head_learning_rate: 0.00024
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 8.0e-6
+    warmup_epochs: 6
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: true
+    rollout: true
+    samples_per_class: 3

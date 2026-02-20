@@ -1,0 +1,61 @@
+# Stage 4 experiment template for Swin-Tiny with frozen lower stages
+experiment:
+  name: stage4_swin_t
+  seed: 314
+  output_dir: experiments/models/advanced_dl/stage4_swin_t
+  figures_dir: experiments/figures/stage4_swin_t
+  reports_dir: experiments/reports/stage4_swin_t
+
+model:
+  registry: vision_transformer
+  key: swin_t
+  params:
+    num_classes: 5
+    pretrained: true
+    pretrained_checkpoint: null
+    output_hidden_states: true
+
+# Swin works well with torchvision-style augmentation and moderate resolution
+data:
+  root: dataset/set_a
+  target_size: [224, 224]
+  batch_size: 32
+  num_workers: 10
+  augmentation:
+    library: torchvision
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 35
+  save_best: true
+  save_last: true
+  early_stopping_patience: 7
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00015
+  head_learning_rate: 0.0004
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: one_cycle
+  params:
+    max_lr: 0.0006
+    pct_start: 0.1
+    anneal_strategy: cosine
+
+knowledge_distillation:
+  enable: false
+  teacher_checkpoint: null
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: true
+    rollout: true
+    samples_per_class: 2
+    output_dir: experiments/figures/stage4_swin_t/attention

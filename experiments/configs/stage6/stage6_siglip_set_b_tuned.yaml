@@ -1,0 +1,63 @@
+# Stage 6 tuned variant — SigLIP on Set B (higher res + stronger aug + longer training)
+experiment:
+  name: stage6_siglip_ord_coral_set_b_tuned
+  seed: 2025
+  output_dir: experiments/models/stage6/siglip_ord_coral/set_b_tuned
+  figures_dir: experiments/figures/stage6_siglip_ord_coral_set_b_tuned
+  reports_dir: experiments/reports/stage6_siglip_ord_coral_set_b_tuned
+
+model:
+  registry: foundation_general
+  key: siglip_base_patch16_384
+  params:
+    pretrained_name: google/siglip-base-patch16-384
+    num_classes: 5
+    freeze_backbone_epochs: 1
+    classifier_dropout: 0.2
+    pool_type: cls
+    head:
+      type: ordinal
+      mode: coral
+      dropout: 0.2
+
+data:
+  root: dataset/set_b
+  target_size: [448, 448]
+  batch_size: 20
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+    mixup_alpha: 0.2
+    cutmix_alpha: 1.0
+
+training:
+  epochs: 36
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00006
+  head_learning_rate: 0.00025
+  weight_decay: 0.015
+  grad_clip_norm: 1.0
+  criterion: coral
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 4.0e-6
+    warmup_epochs: 4
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false

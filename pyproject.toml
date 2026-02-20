@@ -1,0 +1,206 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "knee-osteoarthritis-classification"
+version = "0.1.0"
+description = "Knee Osteoarthritis Image Classification using Progressive ML/DL Approaches"
+authors = [
+    {name = "Medical AI Research Team"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+keywords = ["medical-imaging", "machine-learning", "deep-learning", "osteoarthritis", "classification"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    # 最小核心依赖 - 所有 Stage都需要
+    "numpy>=1.21.0",
+    "pandas>=1.3.0", 
+    "scipy>=1.7.0",
+    "tqdm>=4.65.0",
+    "click>=8.1.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# 开发工具 - 始终推荐安装
+dev = [
+    "jupyter>=1.0.0",
+    "ipywidgets>=8.0.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.7.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.3.0",
+]
+
+# Stage 1: 数据探索（轻量，不含ML库）
+exploration = [
+    "jupyter>=1.0.0",
+    "Pillow>=10.0.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "scikit-image>=0.21.0",
+]
+
+# Stage 2: 传统机器学习
+traditional_ml = [
+    "scikit-learn>=1.3.0",
+    "xgboost>=1.7.0",
+    "lightgbm>=4.0.0",
+    "catboost>=1.2.0",
+    "opencv-python>=4.8.0",
+    "Pillow>=10.0.0",
+    "scikit-image>=0.21.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "mlflow>=2.7.0",
+]
+
+# Stage 3: 深度学习 (只用PyTorch)
+deep_learning = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "scikit-image>=0.21.0",
+    "monai>=1.2.0",
+]
+
+# Stage 4: 高级深度学习
+advanced_dl = [
+    "timm>=0.9.0",              # PyTorch Image Models
+    "albumentations>=1.3.0",    # 高级数据增强
+    "transformers>=4.57.0",     # Hugging Face transformers (SigLIP2 support)
+]
+
+# Stage 5: 多数据集基线 / 实验追踪
+experiment = [
+    "optuna>=3.3.0",           # 超参数优化
+    "wandb>=0.15.0",           # 实验追踪
+    "tensorboard>=2.13.0",     # TensorBoard可视化
+]
+
+# 医学图像专用 (可选)
+medical = [
+    "pydicom>=2.4.0",         # DICOM文件处理
+    "nibabel>=5.0.0",         # NIfTI文件处理
+    "monai>=1.2.0",           # 医学图像AI框架
+]
+
+[project.urls]
+Homepage = "https://github.com/ShengJ96/knee-oa-distance-weighted-coral"
+Repository = "https://github.com/ShengJ96/knee-oa-distance-weighted-coral"
+Documentation = "https://github.com/ShengJ96/knee-oa-distance-weighted-coral#readme"
+"Bug Tracker" = "https://github.com/ShengJ96/knee-oa-distance-weighted-coral/issues"
+
+[project.scripts]
+knee-oa-train = "src.training.cli:main"
+knee-oa-evaluate = "src.evaluation.cli:main"
+knee-oa-experiment = "src.experiments.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "notebooks/",
+    "experiments/configs/",
+    "README.md",
+    "LICENSE",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | experiments/results
+  | experiments/logs
+)/
+'''
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "cv2.*",
+    "sklearn.*",
+    "xgboost.*",
+    "lightgbm.*",
+    "catboost.*",
+    "mlflow.*",
+    "wandb.*",
+    "pydicom.*",
+    "nibabel.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=80",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

@@ -1,0 +1,74 @@
+# ConvNeXt-Tiny CPU smoke config for multi-source (Set A + Set B)
+experiment:
+  name: stage4_convnext_tiny_multi_smoke
+  seed: 321
+  output_dir: experiments/models/advanced_dl/stage4_convnext_tiny_multi_smoke
+  figures_dir: experiments/figures/stage4_convnext_tiny_multi_smoke
+  reports_dir: experiments/reports/stage4_convnext_tiny_multi_smoke
+
+model:
+  registry: advanced_cnn
+  key: convnext_tiny
+  params:
+    num_classes: 5
+    pretrained: false
+    classifier_dropout: 0.3
+    freeze_backbone: false
+
+data:
+  batch_size: 6
+  target_size: [224, 224]
+  num_workers: 0
+  medical_variant: clahe
+  limit_per_class: 2
+  limit_per_class_val: 2
+  limit_per_class_test: 2
+  augmentation:
+    library: torchvision
+    variant: light
+    augment_train: true
+    eval_library: torchvision
+  multi_source:
+    enabled: true
+    sampling: balanced
+    datasets:
+      - root: dataset/set_a
+        medical_variant: clahe
+        limit_per_class: 2
+        limit_per_class_val: 2
+        limit_per_class_test: 2
+      - root: dataset/set_b
+        medical_variant: clahe
+        limit_per_class: 2
+        limit_per_class_val: 2
+        limit_per_class_test: 2
+
+training:
+  epochs: 1
+  save_best: true
+  save_last: true
+  early_stopping_patience: 1
+  amp: false
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: one_cycle
+  params:
+    max_lr: 0.0006
+    pct_start: 0.2
+    anneal_strategy: cos
+
+knowledge_distillation:
+  enable: false
+  teacher_checkpoint: null
+
+evaluation:
+  metrics: [accuracy, f1_macro]
+  attention_viz:
+    enable: false

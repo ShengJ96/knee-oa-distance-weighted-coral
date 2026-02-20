@@ -1,0 +1,62 @@
+# Stage 5 foundation baseline — SigLIP multi-source training (Set A + Set B)
+experiment:
+  name: stage5_siglip_set_ab
+  seed: 2025
+  output_dir: experiments/models/foundation/general/siglip/set_ab
+  figures_dir: experiments/figures/stage5_siglip_set_ab
+  reports_dir: experiments/reports/stage5_siglip_set_ab
+
+model:
+  registry: foundation_general
+  key: siglip_base_patch16_384
+  params:
+    pretrained_name: google/siglip-base-patch16-384
+    num_classes: 5
+    freeze_backbone_epochs: 1
+    classifier_dropout: 0.2
+    pool_type: cls
+
+data:
+  batch_size: 24
+  num_workers: 8
+  target_size: [384, 384]
+  medical_variant: clahe
+  multi_source:
+    enabled: true
+    sampling: balanced
+    datasets:
+      - root: dataset/set_a
+        weight: 1.0
+      - root: dataset/set_b
+        weight: 1.0
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 30
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00005
+  head_learning_rate: 0.0002
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 5.0e-6
+    warmup_epochs: 3
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false

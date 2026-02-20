@@ -1,0 +1,65 @@
+# Stage 5 foundation baseline — DINOv2-ViT-L/14 multi-source training (Set A + Set B)
+experiment:
+  name: stage5_dinov2_set_ab
+  seed: 2025
+  output_dir: experiments/models/foundation/general/dinov2/set_ab
+  figures_dir: experiments/figures/stage5_dinov2_set_ab
+  reports_dir: experiments/reports/stage5_dinov2
+
+model:
+  registry: foundation_general
+  key: dinov2_vit_l14
+  params:
+    pretrained_name: facebook/dinov2-large
+    num_classes: 5
+    freeze_backbone_epochs: 3
+    classifier_dropout: 0.3
+    pool_type: mean
+
+data:
+  batch_size: 20
+  num_workers: 8
+  target_size: [336, 336]
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+  multi_source:
+    enabled: true
+    sampling: balanced
+    datasets:
+      - name: set_a
+        root: dataset/set_a
+        weight: 1.0
+      - name: set_b
+        root: dataset/set_b
+        weight: 1.0
+
+training:
+  epochs: 35
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+  ddp_find_unused_parameters: true
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00004
+  head_learning_rate: 0.00012
+  weight_decay: 0.02
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 4.0e-6
+    warmup_epochs: 4
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false

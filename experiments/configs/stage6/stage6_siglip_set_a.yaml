@@ -1,0 +1,61 @@
+# Stage 6 ordinal baseline — SigLIP on Set A
+experiment:
+  name: stage6_siglip_ord_coral_set_a
+  seed: 2025
+  output_dir: experiments/models/stage6/siglip_ord_coral/set_a
+  figures_dir: experiments/figures/stage6_siglip_ord_coral_set_a
+  reports_dir: experiments/reports/stage6_siglip_ord_coral_set_a
+
+model:
+  registry: foundation_general
+  key: siglip_base_patch16_384
+  params:
+    pretrained_name: google/siglip-base-patch16-384
+    num_classes: 5
+    freeze_backbone_epochs: 1
+    classifier_dropout: 0.2
+    pool_type: cls
+    head:
+      type: ordinal
+      mode: coral
+      dropout: 0.2
+
+data:
+  root: dataset/set_a
+  target_size: [384, 384]
+  batch_size: 24
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 30
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.00005
+  head_learning_rate: 0.0002
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+  criterion: coral
+
+scheduler:
+  name: cosine
+  params:
+    min_lr: 5.0e-6
+    warmup_epochs: 3
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  attention_viz:
+    enable: false

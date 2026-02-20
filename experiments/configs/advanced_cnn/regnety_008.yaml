@@ -1,0 +1,69 @@
+# RegNetY-8GF configuration to benchmark wider convolutional families
+experiment:
+  name: stage4_regnety_008
+  seed: 2024
+  output_dir: experiments/models/advanced_dl/stage4_regnety_008
+  figures_dir: experiments/figures/stage4_regnety_008
+  reports_dir: experiments/reports/stage4_regnety_008
+
+model:
+  registry: advanced_cnn
+  key: regnety_008
+  params:
+    num_classes: 5
+    pretrained: true
+    classifier_dropout: 0.2
+    freeze_backbone: true
+    trainable_patterns: ["head", "classifier", "stage4"]
+
+# Data settings tuned for the RegNet family
+data:
+  root: dataset/set_a
+  target_size: [256, 256]
+  batch_size: 40
+  num_workers: 10
+  limit_per_class: null
+  medical_variant: none
+  augmentation:
+    library: torchvision
+    augment_train: true
+    eval_library: torchvision
+
+training:
+  epochs: 30
+  save_best: true
+  save_last: true
+  early_stopping_patience: 6
+  amp: true
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: sgd
+  learning_rate: 0.0008
+  weight_decay: 0.0005
+  momentum: 0.9
+  grad_clip_norm: null
+
+scheduler:
+  name: step
+  params:
+    step_size: 10
+    gamma: 0.1
+
+knowledge_distillation:
+  enable: true
+  teacher_checkpoint: experiments/models/transfer_learning/best_model_epoch_19.pth
+  temperature: 2.0
+  alpha: 0.7
+  teacher_model:
+    registry: transfer_learning
+    key: medical_resnet50
+    params:
+      num_classes: 5
+      pretrained: true
+      freeze_features: true
+
+evaluation:
+  metrics: [accuracy, f1_macro]
+  attention_viz:
+    enable: false

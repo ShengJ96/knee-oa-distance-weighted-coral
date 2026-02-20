@@ -1,0 +1,62 @@
+# Stage 5 foundation smoke config — SigLIP multi-source (Set A + Set B)
+experiment:
+  name: stage5_siglip_set_ab_smoke
+  seed: 42
+  output_dir: experiments/models/foundation/general/siglip/set_ab_smoke
+  figures_dir: experiments/figures/stage5_siglip_set_ab_smoke
+  reports_dir: experiments/reports/stage5_siglip_set_ab_smoke
+
+model:
+  registry: foundation_general
+  key: siglip_base_patch16_384
+  params:
+    pretrained_name: google/siglip-base-patch16-384
+    num_classes: 5
+    pretrained: false
+    freeze_backbone_epochs: 0
+    classifier_dropout: 0.0
+    pool_type: cls
+
+data:
+  batch_size: 4
+  num_workers: 2
+  target_size: [384, 384]
+  medical_variant: none
+  limit_per_class: 2
+  limit_per_class_val: 2
+  limit_per_class_test: 2
+  multi_source:
+    enabled: true
+    sampling: balanced
+    datasets:
+      - root: dataset/set_a
+        weight: 1.0
+      - root: dataset/set_b
+        weight: 1.0
+  augmentation:
+    library: torchvision
+    augment_train: false
+    eval_library: torchvision
+
+training:
+  epochs: 1
+  save_best: false
+  save_last: false
+  early_stopping_patience: 1
+  amp: false
+  grad_accum_steps: 1
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.0005
+  weight_decay: 0.0
+  grad_clip_norm: null
+
+scheduler:
+  name: null
+  params: {}
+
+evaluation:
+  metrics: [accuracy]
+  attention_viz:
+    enable: false

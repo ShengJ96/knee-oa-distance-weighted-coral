@@ -1,0 +1,60 @@
+# Stage 4 reference configuration for EfficientNet-B0 fine-tuning
+experiment:
+  name: stage4_efficientnet_b0
+  seed: 42
+  output_dir: experiments/models/advanced_dl/stage4_efficientnet_b0
+  figures_dir: experiments/figures/stage4_efficientnet_b0
+  reports_dir: experiments/reports/stage4_efficientnet_b0
+
+model:
+  registry: advanced_cnn
+  key: efficientnet_b0
+  params:
+    num_classes: 5
+    pretrained: true
+    classifier_dropout: 0.25
+    freeze_backbone: false
+
+# Data and augmentation details
+data:
+  root: dataset/set_a
+  target_size: [256, 256]
+  batch_size: 32
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe_roi
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: albumentations
+
+training:
+  epochs: 35
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+
+optimization:
+  optimizer: adamw
+  learning_rate: 0.0002
+  head_learning_rate: 0.0005
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+
+scheduler:
+  name: cosine_warm_restarts
+  params:
+    T_0: 5
+    T_mult: 2
+    eta_min: 1.0e-06
+
+evaluation:
+  metrics: [accuracy, f1_macro, cohen_kappa]
+  confusion_matrix: true
+  attention_viz:
+    enable: true
+    samples_per_class: 4
+    output_dir: experiments/figures/stage4_efficientnet_b0/attention

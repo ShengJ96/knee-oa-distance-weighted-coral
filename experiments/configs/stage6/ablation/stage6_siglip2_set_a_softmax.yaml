@@ -1,0 +1,62 @@
+# Stage 6 Ablation: SIGLIP2 on SET_A with SOFTMAX BASELINE
+# Method: Standard Classification (Softmax + Cross Entropy)
+# Purpose: Baseline to compare against ordinal regression methods
+experiment:
+  name: stage6_siglip2_set_a_softmax
+  seed: 2025
+  output_dir: experiments/models/stage6/siglip2_softmax/set_a_softmax
+  figures_dir: experiments/figures/stage6_siglip2_set_a_softmax
+  reports_dir: experiments/reports/stage6_siglip2_set_a_softmax
+model:
+  registry: foundation_general
+  key: siglip2_so400m_patch14_384
+  params:
+    pretrained_name: google/siglip2-so400m-patch14-384
+    num_classes: 5
+    freeze_backbone_epochs: 1
+    classifier_dropout: 0.2
+    pool_type: cls
+    head:
+      type: linear  # Standard classification head
+      dropout: 0.2
+data:
+  target_size:
+  - 384
+  - 384
+  batch_size: 16
+  num_workers: 8
+  limit_per_class: null
+  medical_variant: clahe
+  augmentation:
+    library: albumentations
+    variant: advanced
+    augment_train: true
+    eval_library: torchvision
+  root: dataset/set_a
+training:
+  epochs: 30
+  save_best: true
+  save_last: true
+  early_stopping_patience: 8
+  amp: true
+  grad_accum_steps: 2
+optimization:
+  optimizer: adamw
+  learning_rate: 3.0e-05
+  head_learning_rate: 0.0001
+  weight_decay: 0.01
+  grad_clip_norm: 1.0
+  criterion:
+    name: cross_entropy  # Standard cross entropy loss
+scheduler:
+  name: cosine
+  params:
+    min_lr: 3.0e-06
+    warmup_epochs: 3
+evaluation:
+  metrics:
+  - accuracy
+  - f1_macro
+  - cohen_kappa
+  attention_viz:
+    enable: false
