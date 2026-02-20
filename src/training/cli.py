@@ -136,22 +136,6 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def prune_checkpoints(output_dir: Path, best_path: Path, keep_last: bool = True) -> None:
-    """
-    Keep only the best checkpoint (and optionally last_model.pth) to save disk.
-    """
-    if not output_dir.exists():
-        return
-    best_name = Path(best_path).name
-    for ckpt in output_dir.glob("best_model_epoch_*.pth"):
-        if ckpt.name != best_name:
-            ckpt.unlink(missing_ok=True)
-    if not keep_last:
-        last_ckpt = output_dir / "last_model.pth"
-        if last_ckpt.exists():
-            last_ckpt.unlink(missing_ok=True)
-
-
 def _normalize_bool(value: Any) -> Optional[bool]:
     if isinstance(value, bool):
         return value
@@ -843,13 +827,6 @@ def train(
                 indent=2,
             )
         )
-
-        # Auto-prune extra checkpoints: keep best and last by default.
-        # Set KEEP_ALL_CHECKPOINTS=1 to skip pruning; set DROP_LAST_CHECKPOINT=1 to drop last_model.pth.
-        keep_all = os.environ.get("KEEP_ALL_CHECKPOINTS") in {"1", "true", "True"}
-        drop_last = os.environ.get("DROP_LAST_CHECKPOINT") in {"1", "true", "True"}
-        if not keep_all:
-            prune_checkpoints(trainer.output_dir, best_path, keep_last=not drop_last)
 
     if distributed:
         _cleanup_distributed()

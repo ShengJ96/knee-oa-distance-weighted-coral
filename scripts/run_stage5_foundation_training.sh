@@ -92,18 +92,8 @@ PY
     return 0
   fi
 
-  local has_stale_weights=0
-  if compgen -G "$output_dir/best_model_epoch_*.pth" > /dev/null; then
-    has_stale_weights=1
-  fi
-  if [[ -f "$output_dir/last_model.pth" ]]; then
-    has_stale_weights=1
-  fi
-
-  if [[ "$has_stale_weights" -eq 1 ]]; then
-    printf '↻ Found checkpoints for %s in %s without metadata.json; removing stale weights before retraining.\n' "$cfg" "$output_dir"
-    rm -f "$output_dir"/best_model_epoch_*.pth || true
-    rm -f "$output_dir/last_model.pth" || true
+  if compgen -G "$output_dir/best_model_epoch_*.pth" > /dev/null || [[ -f "$output_dir/last_model.pth" ]]; then
+    printf 'ℹ Found existing checkpoints for %s in %s (kept, no auto-delete).\n' "$cfg" "$output_dir"
   fi
 
   return 1

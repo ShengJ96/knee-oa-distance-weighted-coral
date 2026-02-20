@@ -6,10 +6,6 @@ This folder is intentionally minimal and keeps only core scripts for:
 - model inference/evaluation
 
 ## Data Curation
-- `analyze_set_b_dedup.py`
-- `analyze_set_b_experts.py`
-- `clean_set_b_keep_ratio.py`
-- `clean_set_b_target_totals.py`
 - `dataset_statistics.py`
 
 ## Training
@@ -22,7 +18,6 @@ This folder is intentionally minimal and keeps only core scripts for:
 
 ## Inference / Evaluation
 - `save_predictions.py`
-- `cross_domain_evaluation.py`
 - `aggregate_single_source_baselines.py`
 
 Core model training/evaluation entry points are also available via the
